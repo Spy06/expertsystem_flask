@@ -1,6 +1,4 @@
-# Mas kasih nafas dela dong mas :)
 from flask import Flask, render_template, request, session, redirect, url_for
-from experta import *
 
 app = Flask(__name__)
 app.secret_key = 'kunci-rahasia-akinator-rahasia' 
@@ -29,30 +27,6 @@ SOLUSI_DB = {
     }
 }
 
-class Gejala(Fact):
-    pass
-
-class DiagnosaPenyakit(KnowledgeEngine):
-    def __init__(self):
-        super().__init__()
-        self.hasil_diagnosa = [] 
-
-    @Rule(AND(OR(Gejala(name='wajah_mencong'), Gejala(name='lengan_kaki_lemah'), Gejala(name='bicara_pelo')), Gejala(name='gejala_membaik_cepat')))
-    def tia_rule(self):
-        self.hasil_diagnosa.append({"kategori": "TIA", "score": 80, "penyakit": "Transient Ischemic Attack (TIA / Stroke Ringan)", "keyakinan": "80%", "detail": SOLUSI_DB["TIA"], "desc": "Gejala khas stroke muncul namun hilang sepenuhnya dalam waktu singkat (< 24 jam). Ini adalah peringatan kuat akan datangnya stroke besar."})
-
-    @Rule(AND(OR(Gejala(name='wajah_mencong'), Gejala(name='lengan_kaki_lemah'), Gejala(name='bicara_pelo')), OR(Gejala(name='gangguan_penglihatan'), Gejala(name='kesulitan_keseimbangan'))))
-    def iskemik_awal(self):
-        self.hasil_diagnosa.append({"kategori": "STROKE_ISKEMIK", "score": 85, "penyakit": "Suspek Stroke Iskemik (Penyumbatan)", "keyakinan": "85%", "detail": SOLUSI_DB["STROKE_ISKEMIK"], "desc": "Terdapat kelemahan saraf fokal (wajah, gerak, atau bicara). Segera bawa ke IGD untuk mengejar 'Golden Period' penanganan (kurang dari 4.5 jam)."})
-
-    @Rule(AND(Gejala(name='sakit_kepala_hebat_tiba_tiba'), OR(Gejala(name='muntah_menyemprot'), Gejala(name='penurunan_kesadaran'), Gejala(name='hipertensi_ekstrem'))))
-    def hemoragik_kritis(self):
-        self.hasil_diagnosa.append({"kategori": "STROKE_HEMORAGIK", "score": 95, "penyakit": "Suspek Stroke Hemoragik (Pendarahan Otak)", "keyakinan": "95% (DARURAT)", "detail": SOLUSI_DB["STROKE_HEMORAGIK"], "desc": "Sakit kepala mendadak seperti tersambar petir disertai muntah/pingsan adalah tanda bahaya pecahnya pembuluh darah otak."})
-        
-    @Rule(AND(Gejala(name='wajah_mencong'), Gejala(name='lengan_kaki_lemah'), Gejala(name='penurunan_kesadaran')))
-    def stroke_berat(self):
-        self.hasil_diagnosa.append({"kategori": "STROKE_HEMORAGIK", "score": 100, "penyakit": "Serangan Stroke Berat", "keyakinan": "100% (ICU)", "detail": SOLUSI_DB["STROKE_HEMORAGIK"], "desc": "Terjadi defisit neurologis berat dengan hilangnya kesadaran. Nyawa terancam."})
-
 GEJALA_OPTIONS = [
     ('wajah_mencong', 'Wajah tampak mencong, asimetris, atau turun sebelah (Face drooping)'),
     ('lengan_kaki_lemah', 'Lengan atau kaki tiba-tiba terasa lemah/lumpuh (biasanya satu sisi tubuh)'),
@@ -67,112 +41,88 @@ GEJALA_OPTIONS = [
     ('kesemutan_sebelah', 'Mati rasa atau kesemutan parah pada separuh badan')
 ]
 
-def hitung_separasi(pertanyaan_key):
-    if pertanyaan_key in ['wajah_mencong', 'lengan_kaki_lemah', 'bicara_pelo']: return 0.95 
-    if pertanyaan_key == 'sakit_kepala_hebat_tiba_tiba': return 0.90
-    if pertanyaan_key == 'gejala_membaik_cepat': return 0.85
-    if pertanyaan_key == 'penurunan_kesadaran': return 0.80
+def jalankan_inferensi(gejala):
+    """Pengganti Experta: Logika manual untuk mencocokkan gejala dengan aturan."""
+    hasil = []
     
-    return 0.5 
+    fast_gejala = gejala.get('wajah_mencong') or gejala.get('lengan_kaki_lemah') or gejala.get('bicara_pelo')
+
+    if fast_gejala and gejala.get('gejala_membaik_cepat'):
+        hasil.append({
+            "kategori": "TIA", "score": 80, 
+            "penyakit": "TIA (Stroke Ringan)", "keyakinan": "80%", 
+            "detail": SOLUSI_DB["TIA"], 
+            "desc": "Gejala khas stroke muncul namun hilang sepenuhnya dalam waktu singkat (< 24 jam)."
+        })
+
+    if fast_gejala and (gejala.get('gangguan_penglihatan') or gejala.get('kesulitan_keseimbangan')):
+        hasil.append({
+            "kategori": "STROKE_ISKEMIK", "score": 85, 
+            "penyakit": "Suspek Stroke Iskemik", "keyakinan": "85%", 
+            "detail": SOLUSI_DB["STROKE_ISKEMIK"], 
+            "desc": "Terdapat kelemahan saraf fokal. Segera ke IGD untuk Golden Period (< 4.5 jam)."
+        })
+
+    if gejala.get('sakit_kepala_hebat_tiba_tiba') and (gejala.get('muntah_menyemprot') or gejala.get('penurunan_kesadaran') or gejala.get('hipertensi_ekstrem')):
+        hasil.append({
+            "kategori": "STROKE_HEMORAGIK", "score": 95, 
+            "penyakit": "Suspek Stroke Hemoragik", "keyakinan": "95%", 
+            "detail": SOLUSI_DB["STROKE_HEMORAGIK"], 
+            "desc": "Sakit kepala mendadak disertai muntah/pingsan adalah tanda pendarahan otak."
+        })
+
+    if gejala.get('wajah_mencong') and gejala.get('lengan_kaki_lemah') and gejala.get('penurunan_kesadaran'):
+        hasil.append({
+            "kategori": "STROKE_HEMORAGIK", "score": 100, 
+            "penyakit": "Serangan Stroke Berat", "keyakinan": "100%", 
+            "detail": SOLUSI_DB["STROKE_HEMORAGIK"], 
+            "desc": "Terjadi defisit neurologis berat dengan hilangnya kesadaran."
+        })
+
+    hasil.sort(key=lambda x: x['score'], reverse=True)
+    return hasil
 
 def pilih_pertanyaan_terbaik(pertanyaan_terpakai):
-    best_q = None
-    best_score = -1
-    
-    pertanyaan_tersedia = [q for q, _ in GEJALA_OPTIONS if q not in pertanyaan_terpakai]
-
-    for q_key in pertanyaan_tersedia:
-        score = hitung_separasi(q_key)
-        
-        if score > best_score:
-            best_score = score
-            best_q = q_key
-            
-    if best_q:
-        q_text = next((text for key, text in GEJALA_OPTIONS if key == best_q), "Pertanyaan tidak ditemukan")
-        return best_q, q_text
-    
-    return None, None
-
-def jalankan_inferensi(gejala_dijawab):
-    """Menjalankan mesin Experta dan memfilter hasilnya berdasarkan aturan Stroke."""
-    engine = DiagnosaPenyakit()
-    engine.reset()
-    
-    for g, answer in gejala_dijawab.items():
-        if answer:
-             engine.declare(Gejala(name=g))
-    
-    engine.run()
-    raw_results = engine.hasil_diagnosa
-
-    best_matches = {}
-    for res in raw_results:
-        kategori = res['kategori']
-        current_score = res['score']
-
-        if kategori not in best_matches or current_score > best_matches[kategori]['score']:
-            best_matches[kategori] = res
-    
-    final_results = list(best_matches.values())
-    final_results.sort(key=lambda x: x['score'], reverse=True)
-    
-    return final_results
+    pertanyaan_tersedia = [q for q in GEJALA_OPTIONS if q[0] not in pertanyaan_terpakai]
+    if not pertanyaan_tersedia:
+        return None, None
+    return pertanyaan_tersedia[0]
 
 @app.route("/", methods=["GET"])
 def start_game():
-    """Memulai dan mereset game dengan kandidat kategori Stroke."""
     session['gejala_dijawab'] = {}
     session['pertanyaan_terpakai'] = []
-    session['kandidat_kategori'] = ['STROKE_ISKEMIK', 'STROKE_HEMORAGIK', 'TIA'] 
-    
     return redirect(url_for('akinator_loop'))
 
 @app.route("/game", methods=["GET", "POST"])
 def akinator_loop():
     gejala_dijawab = session.get('gejala_dijawab', {})
     pertanyaan_terpakai = session.get('pertanyaan_terpakai', [])
-    kandidat_kategori = session.get('kandidat_kategori', ['STROKE_ISKEMIK', 'STROKE_HEMORAGIK', 'TIA'])
 
     if request.method == "POST":
         pertanyaan_sebelumnya = request.form.get('current_question_key')
         jawaban_raw = request.form.get('answer')
         
-        if pertanyaan_sebelumnya and jawaban_raw in ['ya', 'tidak']:
-            jawaban_is_true = (jawaban_raw == 'ya')
-            gejala_dijawab[pertanyaan_sebelumnya] = jawaban_is_true
+        if pertanyaan_sebelumnya:
+            gejala_dijawab[pertanyaan_sebelumnya] = (jawaban_raw == 'ya')
             session['gejala_dijawab'] = gejala_dijawab
         
         final_results = jalankan_inferensi(gejala_dijawab)
-        
-        kategori_terpicu = set(res['kategori'] for res in final_results)
-        session['kandidat_kategori'] = list(kategori_terpicu)
-        kandidat_kategori = list(kategori_terpicu)
-
-        return redirect(url_for('akinator_loop'))
-
-    if len(kandidat_kategori) == 1 or len(pertanyaan_terpakai) >= len(GEJALA_OPTIONS):
-        
-        final_results = jalankan_inferensi(gejala_dijawab)
-        
-        if final_results:
+        if final_results and (final_results[0]['score'] >= 95 or len(pertanyaan_terpakai) >= len(GEJALA_OPTIONS)):
             return render_template("final_result.html", results=final_results)
-        else:
-            return render_template("final_result.html", results=None)
 
     question_key, question_text = pilih_pertanyaan_terbaik(pertanyaan_terpakai)
     
     if not question_key:
-        return render_template("final_result.html", results=None) 
+        final_results = jalankan_inferensi(gejala_dijawab)
+        return render_template("final_result.html", results=final_results)
         
     pertanyaan_terpakai.append(question_key)
     session['pertanyaan_terpakai'] = pertanyaan_terpakai
     
-    
     return render_template("akinator_question.html", 
                            question_key=question_key,
-                           question_text=question_text,
-                           candidates_count=len(kandidat_kategori))
+                           question_text=question_text)
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5001)
+    app.run(debug=True)
