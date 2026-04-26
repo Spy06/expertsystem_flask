@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card">
+    <div class="progress-info" style="color: #888; font-size: 0.9rem; margin-bottom: 10px;">
+        Menganalisa gejala... (Kandidat Penyakit: {{ candidates_count }})
+    </div>
+    
+    <div class="question-section">
+        <h2 class="question-text">{{ question_text }}</h2>
+        
+        <form action="{{ url_for('akinator_loop') }}" method="POST">
+            <input type="hidden" name="current_question_key" value="{{ question_key }}">
+            
+            <div class="btn-group">
+                <button type="submit" name="answer" value="ya" class="btn btn-yes">
+                    <i class="fa-solid fa-check"></i> Ya
+                </button>
+                <button type="submit" name="answer" value="tidak" class="btn btn-no">
+                    <i class="fa-solid fa-xmark"></i> Tidak
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

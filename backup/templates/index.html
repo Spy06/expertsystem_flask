@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Sistem Pakar Diagnosa Mobil Toyota</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f0f2f5;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 700px;
+            margin: 60px auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            padding: 30px 40px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        form {
+            margin-top: 20px;
+        }
+        .gejala {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #f8f9fa;
+            padding: 8px 10px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+        }
+        button {
+            display: block;
+            margin: 0 auto;
+            padding: 10px 25px;
+            border: none;
+            background: #0078D7;
+            color: white;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .result {
+            margin-top: 25px;
+            background: #e8f0fe;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .result h3 {
+            margin-top: 0;
+        }
+        .result p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Sistem Pakar Diagnosa Mobil Toyota</h1>
+        <form method="POST">
+            <div class="gejala">
+                {% for g in gejala_list %}
+                <label>
+                    <input type="checkbox" name="gejala" value="{{ g }}" {% if g in selected %}checked{% endif %}>
+                    {{ g.capitalize() }}
+                </label>
+                {% endfor %}
+            </div>
+            <button type="submit">Diagnosa Sekarang</button>
+        </form>
+
+        {% if hasil %}
+        <div class="result">
+            <h3>Kemungkinan yang terjadi:</h3>
+            {% for h in hasil %}
+                <p>• {{ h }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

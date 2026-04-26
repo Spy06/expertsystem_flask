@@ -1,0 +1,178 @@
+/* static/style.css */
+:root {
+    --primary-color: #007bff;
+    --primary-dark: #0056b3;
+    --bg-color: #f4f7f6;
+    --card-bg: #ffffff;
+    --text-color: #333;
+    --danger-color: #dc3545;
+    --success-color: #28a745;
+    --warning-bg: #fff3cd;
+    --warning-text: #856404;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.navbar {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 1rem 2rem;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.navbar h1 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+}
+
+.card {
+    background: var(--card-bg);
+    padding: 2.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    max-width: 600px;
+    width: 100%;
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+
+/* Question Page Styles */
+.question-text {
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.btn-group {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    margin-top: 1.5rem;
+}
+
+.btn {
+    padding: 12px 30px;
+    border: none;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: bold;
+    min-width: 120px;
+}
+
+.btn-yes {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.btn-yes:hover {
+    background-color: var(--primary-dark);
+    transform: translateY(-2px);
+}
+
+.btn-no {
+    background-color: #e2e6ea;
+    color: #495057;
+}
+
+.btn-no:hover {
+    background-color: #dbe2ef;
+    transform: translateY(-2px);
+}
+
+/* Result Page Styles */
+.result-header {
+    border-bottom: 2px solid #eee;
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.diagnosis-title {
+    color: var(--primary-color);
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+}
+
+.confidence-badge {
+    background-color: var(--success-color);
+    color: white;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+}
+
+.result-image img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin: 1rem 0;
+    border: 1px solid #ddd;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    text-align: left;
+    margin-top: 1.5rem;
+}
+
+.info-box {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    border-left: 4px solid var(--primary-color);
+}
+
+.info-box h4 {
+    margin-top: 0;
+    color: var(--primary-dark);
+    margin-bottom: 0.5rem;
+}
+
+.alert-box {
+    background-color: #fff5f5;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+    text-align: left;
+    font-weight: bold;
+}
+
+.btn-restart {
+    display: inline-block;
+    margin-top: 2rem;
+    background-color: var(--text-color);
+    color: white;
+    text-decoration: none;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .card { padding: 1.5rem; }
+    .question-text { font-size: 1.2rem; }
+    .btn-group { flex-direction: column; }
+    .btn { width: 100%; }
+}

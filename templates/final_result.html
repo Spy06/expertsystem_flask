@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card">
+    {% if results %}
+        {% set top_result = results[0] %}
+        
+        <div class="result-header">
+            <span class="confidence-badge">Tingkat Keyakinan: {{ top_result.keyakinan }}</span>
+            <h2 class="diagnosis-title">{{ top_result.penyakit }}</h2>
+            <p>{{ top_result.desc }}</p>
+        </div>
+
+        {% if top_result.detail.image %}
+        <div class="result-image">
+            <img src="{{ url_for('static', filename='img/' + top_result.detail.image) }}" alt="Ilustrasi Gejala">
+        </div>
+        {% endif %}
+
+        <div class="info-grid">
+            <div class="info-box">
+                <h4><i class="fa-solid fa-bed-pulse"></i> Penanganan</h4>
+                <p>{{ top_result.detail.penanganan }}</p>
+            </div>
+
+            <div class="info-box">
+                <h4><i class="fa-solid fa-utensils"></i> Diet & Nutrisi</h4>
+                <p>{{ top_result.detail.diet }}</p>
+            </div>
+
+            <div class="info-box">
+                <h4><i class="fa-solid fa-pills"></i> Medis</h4>
+                <p>{{ top_result.detail.medis }}</p>
+            </div>
+        </div>
+
+        <div class="alert-box">
+            <h4><i class="fa-solid fa-triangle-exclamation"></i> RED FLAG (Waspada)</h4>
+            <p>{{ top_result.detail.red_flag }}</p>
+        </div>
+
+    {% else %}
+        <div class="result-header">
+            <h2 class="diagnosis-title">Diagnosa Tidak Ditemukan</h2>
+            <p>Maaf, gejala yang Anda input tidak cukup spesifik untuk menentukan apakah ini DBD atau Tipes berdasarkan basis pengetahuan kami.</p>
+        </div>
+        <div class="alert-box" style="background: #fff3cd; color: #856404; border-color: #ffeeba;">
+            Saran: Segera konsultasikan ke dokter untuk pemeriksaan fisik dan cek darah lab lebih lanjut.
+        </div>
+    {% endif %}
+
+    <a href="{{ url_for('start_game') }}" class="btn btn-restart">
+        <i class="fa-solid fa-rotate-right"></i> Diagnosa Ulang
+    </a>
+</div>
+{% endblock %}
